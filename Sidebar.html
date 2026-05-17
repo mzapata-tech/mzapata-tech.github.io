@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Google Sans',Arial,sans-serif;font-size:13px;color:#202124;background:#f1f3f4;overflow-x:hidden}
+
+    /* ---- TABS ---- */
+    .tabs{display:flex;background:#1a73e8;position:sticky;top:0;z-index:50}
+    .tab{flex:1;padding:11px 2px;text-align:center;color:rgba(255,255,255,.65);cursor:pointer;font-size:11px;font-weight:500;border-bottom:3px solid transparent;transition:all .15s;user-select:none}
+    .tab.active{color:#fff;border-bottom-color:#fff}
+    .tab:hover{color:#fff;background:rgba(255,255,255,.08)}
+
+    /* ---- PANELS ---- */
+    .panel{display:none;padding:12px;animation:fadeIn .15s ease}
+    .panel.active{display:block}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+    /* ---- FORM ---- */
+    label{display:block;font-size:11px;color:#5f6368;margin:10px 0 3px;font-weight:600;letter-spacing:.3px}
+    label:first-of-type{margin-top:0}
+    input,select,textarea{width:100%;padding:8px 10px;border:1.5px solid #dadce0;border-radius:8px;font-size:13px;outline:none;background:#fff;transition:border-color .15s,box-shadow .15s;color:#202124}
+    input:focus,select:focus,textarea:focus{border-color:#1a73e8;box-shadow:0 0 0 3px rgba(26,115,232,.12)}
+    textarea{resize:vertical;min-height:56px}
+
+    /* ---- BUTTONS ---- */
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:opacity .15s,transform .1s;letter-spacing:.2px}
+    .btn:active{transform:scale(.97)}
+    .btn-primary{background:#1a73e8;color:#fff;width:100%;padding:11px;margin-top:12px;font-size:13px}
+    .btn-primary:hover{background:#1557b0}
+    .btn-primary:disabled{background:#9aa0a6;cursor:not-allowed}
+    .btn-sm{padding:5px 10px;font-size:11px}
+    .btn-green{background:#34a853;color:#fff}
+    .btn-red{background:#d93025;color:#fff}
+    .btn-gray{background:#e8eaed;color:#3c4043}
+    .btn-gray:hover{background:#d2d5d9}
+    .btn-wa{background:#25d366;color:#fff}
+    .btn-wa:hover{background:#1da851}
+    .btn-purple{background:#7b1fa2;color:#fff}
+
+    /* ---- CARDS DE CITA ---- */
+    .cita-card{background:#fff;border:1.5px solid #e8eaed;border-radius:10px;padding:10px 12px;margin-bottom:8px;border-left:4px solid #9aa0a6;transition:box-shadow .15s}
+    .cita-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.08)}
+    .cita-card.confirmada{border-left-color:#34a853}
+    .cita-card.cancelada{border-left-color:#d93025;opacity:.8}
+    .cita-card.completada{border-left-color:#7b1fa2}
+    .cita-card.pendiente{border-left-color:#f9ab00}
+
+    .cita-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+    .cita-hora{font-size:18px;font-weight:700;color:#1a73e8;line-height:1}
+    .estado-badge{font-size:10px;padding:3px 9px;border-radius:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+    .badge-Pendiente{background:#fff3cd;color:#856404}
+    .badge-Confirmada{background:#d1e7dd;color:#155724}
+    .badge-Cancelada{background:#f8d7da;color:#842029}
+    .badge-Completada{background:#e8d5f5;color:#5b1d7a}
+
+    .cita-paciente{font-size:14px;font-weight:700;color:#202124;margin-bottom:2px}
+    .cita-info{color:#5f6368;font-size:11px;line-height:1.7}
+    .precio-inline{font-weight:700;color:#188038}
+    .cita-actions{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap}
+
+    /* ---- AUTOCOMPLETE ---- */
+    .ac-wrap{position:relative}
+    .ac-list{background:#fff;border:1.5px solid #dadce0;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.12);position:absolute;z-index:200;width:100%;max-height:180px;overflow-y:auto;display:none}
+    .ac-item{padding:8px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid #f1f3f4;display:flex;justify-content:space-between}
+    .ac-item:last-child{border-bottom:none}
+    .ac-item:hover{background:#f8f9fa}
+    .ac-tel{color:#5f6368;font-size:11px}
+
+    /* ---- FILTER BAR ---- */
+    .filter-row{display:flex;gap:6px;margin-bottom:8px}
+    .filter-row select,.filter-row input{flex:1;font-size:12px;padding:7px 8px}
+
+    /* ---- BADGES / COUNTS ---- */
+    .count-bar{font-size:11px;color:#5f6368;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+    .count-num{font-weight:700;color:#1a73e8}
+
+    /* ---- MSG BOX ---- */
+    .msg-preview{background:#e9f5ff;border:1.5px solid #bee0f7;border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.65;white-space:pre-wrap;margin-top:8px;color:#1a1a2e;font-family:'Courier New',monospace}
+
+    /* ---- BULK ITEM ---- */
+    .bulk-item{background:#fff;border:1.5px solid #e8eaed;border-radius:8px;padding:10px;margin-bottom:8px}
+    .bulk-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+    .bulk-nombre{font-weight:700;font-size:12px}
+    .bulk-sub{color:#5f6368;font-size:11px;margin-top:1px}
+
+    /* ---- LOADING / EMPTY ---- */
+    .loading{text-align:center;padding:24px;color:#80868b}
+    .spinner{display:inline-block;width:22px;height:22px;border:2.5px solid #e8eaed;border-top-color:#1a73e8;border-radius:50%;animation:spin .7s linear infinite;margin-bottom:8px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* ---- ALERT ---- */
+    .alert-box{padding:9px 12px;border-radius:8px;font-size:12px;margin-bottom:8px;font-weight:500;display:none}
+    .alert-ok{background:#d1e7dd;color:#155724}
+    .alert-err{background:#f8d7da;color:#842029}
+    .alert-info{background:#cfe2ff;color:#084298}
+
+    /* ---- PRECIO ---- */
+    .precio-row{display:flex;justify-content:space-between;align-items:center;background:#f8f9fa;border-radius:8px;padding:7px 10px;margin-top:6px}
+    .precio-label{font-size:12px;color:#5f6368;font-weight:600}
+    .precio-val{font-size:16px;font-weight:700;color:#188038}
+
+    /* ---- SECTION TITLE ---- */
+    .sec-title{font-size:11px;font-weight:700;color:#5f6368;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;padding-bottom:5px;border-bottom:1.5px solid #e8eaed}
+
+    /* ---- DIVIDER ---- */
+    .divider{height:1px;background:#e8eaed;margin:10px 0}
+
+    /* ---- CALENDAR BADGE ---- */
+    .cal-badge{font-size:10px;background:#e8f0fe;color:#1a73e8;padding:2px 7px;border-radius:10px;font-weight:600}
+  </style>
+</head>
+<body>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('hoy')">📅 Hoy</div>
+  <div class="tab" onclick="showTab('agendar')">➕ Agendar</div>
+  <div class="tab" onclick="showTab('mensajes')">💬 WhatsApp</div>
+  <div class="tab" onclick="showTab('buscar')">🔍 Buscar</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PANEL: HOY                                                    -->
+<!-- ============================================================ -->
+<div id="panel-hoy" class="panel active">
+  <div class="filter-row">
+    <input type="date" id="hoy-fecha" onchange="cargarCitasHoy()">
+    <select id="hoy-doctor" onchange="cargarCitasHoy()">
+      <option value="">Todos los doctores</option>
+    </select>
+  </div>
+  <div class="filter-row">
+    <select id="hoy-estado" onchange="cargarCitasHoy()">
+      <option value="">Todos los estados</option>
+      <option value="Pendiente">⏳ Pendiente</option>
+      <option value="Confirmada">✅ Confirmada</option>
+      <option value="Completada">✓ Completada</option>
+      <option value="Cancelada">✕ Cancelada</option>
+    </select>
+    <button class="btn btn-gray" onclick="cargarCitasHoy()" style="white-space:nowrap">↻ Actualizar</button>
+  </div>
+  <div id="citas-container"><div class="loading"><div class="spinner"></div><br>Cargando citas...</div></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PANEL: AGENDAR                                               -->
+<!-- ============================================================ -->
+<div id="panel-agendar" class="panel">
+  <div class="alert-box" id="form-alert"></div>
+
+  <label>Doctor *</label>
+  <select id="form-doctor" onchange="onDoctorChange()">
+    <option value="">Seleccionar doctor...</option>
+  </select>
+
+
+  <label>Fecha *</label>
+<input type="date" id="form-fecha" onchange="onFechaODoctorChange()">
+
+<div id="disponibilidad-wrap" style="display:none;margin:10px 0">
+  <div class="sec-title">Disponibilidad del día</div>
+  <div id="grid-disponibilidad" style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px"></div>
+  <div style="display:flex;gap:10px;font-size:10px;color:#5f6368;margin-bottom:4px">
+    <span style="display:flex;align-items:center;gap:3px">
+      <span style="width:10px;height:10px;background:#e6f4ea;border:1px solid #34a853;border-radius:3px;display:inline-block"></span> Libre
+    </span>
+    <span style="display:flex;align-items:center;gap:3px">
+      <span style="width:10px;height:10px;background:#fce8e6;border:1px solid #d93025;border-radius:3px;display:inline-block"></span> Ocupada
+    </span>
+  </div>
+</div>
+
+<label>Hora *</label>
+<select id="form-hora">
+  <option value="">Seleccionar hora...</option>
+</select>
+
+  <div class="divider" style="margin-top:10px;"></div>
+  <div class="sec-title">Datos del paciente</div>
+
+  <label>Nombre del paciente *</label>
+  <div class="ac-wrap">
+    <input type="text" id="form-paciente" placeholder="Escriba el nombre..." oninput="buscarPaciente(this.value)" autocomplete="off">
+    <div id="ac-paciente" class="ac-list"></div>
+  </div>
+
+  <label>Teléfono *</label>
+  <input type="tel" id="form-telefono" placeholder="8888-1234">
+
+  <div class="divider"></div>
+  <div class="sec-title">Servicio</div>
+
+  <label>Servicio *</label>
+  <select id="form-servicio" onchange="onServicioChange()">
+    <option value="">Primero seleccione un doctor</option>
+  </select>
+
+  <div class="precio-row" id="precio-row" style="display:none">
+    <span class="precio-label">💰 Precio</span>
+    <span class="precio-val" id="form-precio-label">₡0</span>
+  </div>
+
+  <label style="margin-top:10px">Notas adicionales</label>
+  <textarea id="form-notas" placeholder="Motivo de consulta, indicaciones especiales..."></textarea>
+
+  <button class="btn btn-primary" id="btn-agendar" onclick="agendarCita()">✅ Agendar cita</button>
+</div>
+
+<!-- ============================================================ -->
+<!-- PANEL: WHATSAPP                                              -->
+<!-- ============================================================ -->
+<div id="panel-mensajes" class="panel">
+  <div class="sec-title">Generar mensajes</div>
+
+  <label>Tipo de mensaje</label>
+  <select id="msg-tipo">
+    <option value="confirmacion">✅ Confirmación de cita</option>
+    <option value="recordatorio">⏰ Recordatorio (día anterior)</option>
+    <option value="agendada">✅ Cita agendada</option>
+    <option value="cancelacion">❌ Notificar cancelación</option>
+  </select>
+
+  <label>Filtrar por doctor</label>
+  <select id="msg-doctor">
+    <option value="">Todos los doctores</option>
+  </select>
+
+  <label>Fecha de las citas</label>
+  <input type="date" id="msg-fecha">
+
+  <label>Filtrar por estado</label>
+  <select id="msg-estado">
+    <option value="">Todos los estados</option>
+    <option value="Pendiente">Pendiente</option>
+    <option value="Confirmada">Confirmada</option>
+  </select>
+
+  <button class="btn btn-primary btn-wa" onclick="generarMensajes()" style="background:#25d366;margin-top:12px">
+    💬 Generar mensajes WhatsApp
+  </button>
+
+  <div id="mensajes-container" style="margin-top:12px;"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PANEL: BUSCAR                                                -->
+<!-- ============================================================ -->
+<div id="panel-buscar" class="panel">
+  <div class="sec-title">Buscar citas</div>
+  <label>Nombre del paciente o teléfono</label>
+  <input type="text" id="buscar-query" placeholder="Escriba al menos 2 caracteres..." oninput="buscarCitas(this.value)">
+  <div id="buscar-container" style="margin-top:10px;"></div>
+</div>
+
+<script>
+// ============================================================
+// ESTADO GLOBAL
+// ============================================================
+var doctores = [];
+var serviciosCache = {};
+var HORAS = [];
+
+// ============================================================
+// INICIALIZACIÓN
+// ============================================================
+function init() {
+  var hoy = new Date();
+  var fechaHoy = hoy.getFullYear() + '-' +
+    String(hoy.getMonth()+1).padStart(2,'0') + '-' +
+    String(hoy.getDate()).padStart(2,'0');
+
+  document.getElementById('hoy-fecha').value = fechaHoy;
+  document.getElementById('msg-fecha').value = fechaHoy;
+  document.getElementById('form-fecha').value = fechaHoy;
+
+  // Generar opciones de hora (7:00 a 18:30, cada 30 min)
+  var horaSelect = document.getElementById('form-hora');
+  for (var h = 7; h <= 18; h++) {
+    ['00','30'].forEach(function(m) {
+      if (h === 18 && m === '30') return;
+      var val = String(h).padStart(2,'0') + ':' + m;
+      var opt = document.createElement('option');
+      opt.value = val;
+      opt.textContent = val;
+      horaSelect.appendChild(opt);
+      HORAS.push(val);
+    });
+  }
+
+  // Cargar doctores
+  google.script.run
+    .withSuccessHandler(function(data) {
+      doctores = data || [];
+      poblarSelectDoctores();
+      cargarCitasHoy();
+    })
+    .withFailureHandler(function() { cargarCitasHoy(); })
+    .getDoctores();
+}
+
+function poblarSelectDoctores() {
+  var ids = ['hoy-doctor','form-doctor','msg-doctor'];
+  ids.forEach(function(id) {
+    var sel = document.getElementById(id);
+    var val = sel.value;
+    while (sel.options.length > 1) sel.remove(1);
+    doctores.forEach(function(d) {
+      var opt = document.createElement('option');
+      opt.value = d.nombre;
+      opt.textContent = d.nombre + ' · ' + d.especialidad;
+      sel.appendChild(opt);
+    });
+    if (val) sel.value = val;
+  });
+}
+
+// ============================================================
+// TABS
+// ============================================================
+function showTab(name) {
+  var tabs = ['hoy','agendar','mensajes','buscar'];
+  document.querySelectorAll('.tab').forEach(function(t, i) {
+    t.classList.toggle('active', tabs[i] === name);
+  });
+  document.querySelectorAll('.panel').forEach(function(p) {
+    p.classList.remove('active');
+  });
+  document.getElementById('panel-'+name).classList.add('active');
+  if (name === 'hoy') cargarCitasHoy();
+}
+
+// ============================================================
+// PANEL HOY
+// ============================================================
+function cargarCitasHoy() {
+  var filtros = {
+    fecha:  document.getElementById('hoy-fecha').value,
+    doctor: document.getElementById('hoy-doctor').value,
+    estado: document.getElementById('hoy-estado').value
+  };
+  document.getElementById('citas-container').innerHTML =
+    '<div class="loading"><div class="spinner"></div><br>Cargando...</div>';
+  google.script.run
+    .withSuccessHandler(renderCitas)
+    .withFailureHandler(function(e) {
+      document.getElementById('citas-container').innerHTML =
+        '<div class="loading" style="color:#d93025;">⚠️ Error al cargar. Intente de nuevo.</div>';
+    })
+    .getCitas(filtros);
+}
+
+function renderCitas(citas) {
+  var container = document.getElementById('citas-container');
+  if (!citas || !citas.length) {
+    container.innerHTML = '<div class="loading">📭 No hay citas para este filtro</div>';
+    return;
+  }
+
+  // Conteo por estado
+  var counts = {};
+  citas.forEach(function(c) { counts[c.estado] = (counts[c.estado]||0)+1; });
+  var countStr = Object.entries(counts).map(function(e){ return e[1]+' '+e[0]; }).join(' · ');
+
+  container.innerHTML = '<div class="count-bar"><span><span class="count-num">'+citas.length+'</span> cita(s)</span><span style="color:#5f6368">'+countStr+'</span></div>';
+
+  citas.forEach(function(c) {
+    var div = document.createElement('div');
+    div.className = 'cita-card ' + (c.estado||'').toLowerCase();
+    var calBadge = c.enCalendar === 'Sí' ? '<span class="cal-badge">📅 Calendar</span>' : '';
+    div.innerHTML =
+      '<div class="cita-top">' +
+        '<span class="cita-hora">'+c.hora+'</span>' +
+        '<div style="display:flex;gap:4px;align-items:center">' + calBadge +
+          '<span class="estado-badge badge-'+c.estado+'">'+c.estado+'</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="cita-paciente">👤 '+esc(c.paciente)+'</div>' +
+      '<div class="cita-info">📞 '+esc(c.telefono)+'</div>' +
+      '<div class="cita-info">👨‍⚕️ '+esc(c.doctor)+' · '+esc(c.especialidad)+'</div>' +
+      '<div class="cita-info">💉 '+esc(c.servicio)+' · <span class="precio-inline">₡'+Number(c.precio||0).toLocaleString('es-CR')+'</span></div>' +
+      (c.notas ? '<div class="cita-info" style="margin-top:3px;font-style:italic">📝 '+esc(c.notas)+'</div>' : '') +
+      '<div class="cita-actions">' +
+        '<button class="btn btn-sm btn-green" onclick="cambiarEstado('+c.rowIndex+',\'Confirmada\')">✅ Confirmar</button>' +
+        '<button class="btn btn-sm btn-purple" onclick="cambiarEstado('+c.rowIndex+',\'Completada\')">✓ Completa</button>' +
+        '<button class="btn btn-sm btn-red" onclick="cambiarEstado('+c.rowIndex+',\'Cancelada\')">✕ Cancelar</button>' +
+        '<button class="btn btn-sm btn-wa" onclick="copiarMsgCita('+c.rowIndex+')">💬 Copiar msg</button>' +
+      '</div>';
+    container.appendChild(div);
+  });
+}
+
+// Guardar referencia de citas para copiar mensajes
+var _citasActuales = {};
+
+function copiarMsgCita(rowIndex) {
+  // Buscar la cita en la lista actual
+  var filtros = {
+    fecha:  document.getElementById('hoy-fecha').value,
+    doctor: document.getElementById('hoy-doctor').value,
+    estado: document.getElementById('hoy-estado').value
+  };
+  google.script.run
+    .withSuccessHandler(function(citas) {
+      var cita = citas.find(function(c){ return c.rowIndex === rowIndex; });
+      if (!cita) { alert('No se encontró la cita.'); return; }
+      google.script.run
+        .withSuccessHandler(function(msg) { copiarAlPortapapeles(msg); })
+        .generarMensajeWhatsApp(cita, 'confirmacion');
+    })
+    .getCitas(filtros);
+}
+
+function cambiarEstado(rowIndex, estado) {
+  google.script.run
+    .withSuccessHandler(cargarCitasHoy)
+    .actualizarEstadoCita(rowIndex, estado);
+}
+
+// ============================================================
+// PANEL AGENDAR
+// ============================================================
+function onDoctorChange() {
+  var doctor = document.getElementById('form-doctor').value;
+  var sel = document.getElementById('form-servicio');
+  sel.innerHTML = '<option value="">Cargando servicios...</option>';
+  document.getElementById('precio-row').style.display = 'none';
+  if (!doctor) {
+    sel.innerHTML = '<option value="">Primero seleccione un doctor</option>';
+    document.getElementById('disponibilidad-wrap').style.display = 'none';
+    return;
+  }
+  if (serviciosCache[doctor]) {
+    poblarServicios(serviciosCache[doctor]);
+  } else {
+    google.script.run
+      .withSuccessHandler(function(data) { serviciosCache[doctor] = data; poblarServicios(data); })
+      .getServiciosPorDoctor(doctor);
+  }
+  onFechaODoctorChange();
+}
+
+function onFechaODoctorChange() {
+  var doctor = document.getElementById('form-doctor').value;
+  var fecha  = document.getElementById('form-fecha').value;
+  var wrap   = document.getElementById('disponibilidad-wrap');
+
+  if (!doctor || !fecha) { wrap.style.display = 'none'; return; }
+
+  wrap.style.display = 'block';
+  document.getElementById('grid-disponibilidad').innerHTML =
+    '<div style="grid-column:1/-1;text-align:center;color:#5f6368;font-size:11px;padding:6px">Cargando...</div>';
+
+  google.script.run
+    .withSuccessHandler(function(ocupadas) {
+      var horasOcupadas = {};
+      (ocupadas || []).forEach(function(c) { horasOcupadas[c.hora] = c; });
+
+      var grid = document.getElementById('grid-disponibilidad');
+      grid.innerHTML = '';
+
+      HORAS.forEach(function(h) {
+        var cita   = horasOcupadas[h];
+        var libre  = !cita;
+        var btn    = document.createElement('button');
+        btn.className = 'btn btn-sm';
+        btn.textContent = h;
+        btn.title = libre ? 'Disponible' : (cita.paciente + ' [' + cita.estado + ']');
+        btn.style.cssText = libre
+          ? 'background:#e6f4ea;color:#155724;border:1.5px solid #34a853;border-radius:6px;font-size:11px;padding:5px 2px;cursor:pointer;width:100%'
+          : 'background:#fce8e6;color:#842029;border:1.5px solid #d93025;border-radius:6px;font-size:11px;padding:5px 2px;cursor:not-allowed;width:100%';
+
+        if (libre) {
+          btn.onclick = function() {
+            document.getElementById('form-hora').value = h;
+            grid.querySelectorAll('button').forEach(function(b) {
+              if (b.style.background === 'rgb(26, 115, 232)') {
+                b.style.background = '#e6f4ea';
+                b.style.color = '#155724';
+              }
+            });
+            btn.style.background = '#1a73e8';
+            btn.style.color = '#fff';
+          };
+        }
+        grid.appendChild(btn);
+      });
+    })
+    .getDisponibilidad(doctor, fecha);
+}
+
+function poblarServicios(servicios) {
+  var sel = document.getElementById('form-servicio');
+  sel.innerHTML = '<option value="">Seleccionar servicio...</option>';
+  if (!servicios || !servicios.length) {
+    sel.innerHTML += '<option disabled>Sin servicios registrados para este doctor</option>';
+    return;
+  }
+  servicios.forEach(function(s) {
+    var opt = document.createElement('option');
+    opt.value = s.servicio;
+    opt.dataset.precio = s.precio;
+    opt.textContent = s.servicio + ' · ₡' + Number(s.precio).toLocaleString('es-CR');
+    sel.appendChild(opt);
+  });
+}
+
+function onServicioChange() {
+  var sel = document.getElementById('form-servicio');
+  var opt = sel.options[sel.selectedIndex];
+  var precio = opt && opt.dataset.precio ? Number(opt.dataset.precio) : null;
+  var row = document.getElementById('precio-row');
+  if (precio !== null && precio >= 0 && sel.value) {
+    document.getElementById('form-precio-label').textContent = '₡' + precio.toLocaleString('es-CR');
+    row.style.display = 'flex';
+  } else {
+    row.style.display = 'none';
+  }
+}
+
+var _acTimer = null;
+function buscarPaciente(q) {
+  clearTimeout(_acTimer);
+  if (q.length < 2) { document.getElementById('ac-paciente').style.display='none'; return; }
+  _acTimer = setTimeout(function() {
+    google.script.run
+      .withSuccessHandler(function(pacientes) {
+        var list = document.getElementById('ac-paciente');
+        if (!pacientes || !pacientes.length) { list.style.display='none'; return; }
+        list.innerHTML = pacientes.map(function(p) {
+          return '<div class="ac-item" onclick="seleccionarPaciente(\''+esc(p.nombre)+'\',\''+esc(p.telefono)+'\')">' +
+            '<span>'+esc(p.nombre)+'</span>' +
+            '<span class="ac-tel">'+esc(p.telefono)+'</span>' +
+          '</div>';
+        }).join('');
+        list.style.display = 'block';
+      })
+      .getPacientesSugeridos(q);
+  }, 300);
+}
+
+function seleccionarPaciente(nombre, telefono) {
+  document.getElementById('form-paciente').value = nombre;
+  document.getElementById('form-telefono').value = telefono;
+  document.getElementById('ac-paciente').style.display = 'none';
+}
+
+function agendarCita() {
+  var sel = document.getElementById('form-servicio');
+  var opt = sel.options[sel.selectedIndex];
+  var cita = {
+    doctor:    document.getElementById('form-doctor').value,
+    fecha:     document.getElementById('form-fecha').value,
+    hora:      document.getElementById('form-hora').value,
+    paciente:  document.getElementById('form-paciente').value.trim(),
+    telefono:  document.getElementById('form-telefono').value.trim(),
+    servicio:  sel.value,
+    precio:    opt && opt.dataset.precio ? opt.dataset.precio : '',
+    notas:     document.getElementById('form-notas').value.trim()
+  };
+
+  var req = ['doctor','fecha','hora','paciente','telefono','servicio'];
+  var falt = req.filter(function(k){ return !cita[k]; });
+  if (falt.length) {
+    showFormAlert('⚠️ Complete todos los campos obligatorios (*) antes de continuar.', 'err');
+    return;
+  }
+
+  var btn = document.getElementById('btn-agendar');
+  btn.disabled = true;
+  btn.textContent = '⏳ Guardando...';
+  showFormAlert('Guardando cita en el sistema...', 'info');
+
+  google.script.run
+    .withSuccessHandler(function(r) {
+      btn.disabled = false;
+      btn.textContent = '✅ Agendar cita';
+      if (r && r.success) {
+        showFormAlert('✅ ¡Cita agendada exitosamente! ID: ' + r.id, 'ok');
+        // Limpiar formulario
+        ['form-doctor','form-hora','form-servicio','form-paciente','form-telefono','form-notas'].forEach(function(id){
+          document.getElementById(id).value = '';
+        });
+        document.getElementById('precio-row').style.display = 'none';
+      } else {
+        showFormAlert('❌ Error: ' + (r && r.error ? r.error : 'intente de nuevo'), 'err');
+      }
+    })
+    .withFailureHandler(function(e) {
+      btn.disabled = false;
+      btn.textContent = '✅ Agendar cita';
+      showFormAlert('❌ Error al guardar: ' + e.message, 'err');
+    })
+    .agregarCita(cita);
+}
+
+function showFormAlert(msg, type) {
+  var el = document.getElementById('form-alert');
+  el.className = 'alert-box alert-' + type;
+  el.textContent = msg;
+  el.style.display = 'block';
+  if (type === 'ok') setTimeout(function(){ el.style.display='none'; }, 5000);
+}
+
+// ============================================================
+// PANEL WHATSAPP
+// ============================================================
+function generarMensajes() {
+  var filtros = {
+    fecha:  document.getElementById('msg-fecha').value,
+    doctor: document.getElementById('msg-doctor').value,
+    estado: document.getElementById('msg-estado').value
+  };
+  var tipo = document.getElementById('msg-tipo').value;
+
+  document.getElementById('mensajes-container').innerHTML =
+    '<div class="loading"><div class="spinner"></div><br>Generando mensajes...</div>';
+
+  google.script.run
+    .withSuccessHandler(function(mensajes) {
+      var c = document.getElementById('mensajes-container');
+      if (!mensajes || !mensajes.length) {
+        c.innerHTML = '<div class="loading">📭 No hay citas con esos filtros</div>';
+        return;
+      }
+
+      c.innerHTML = '<div class="count-bar"><span class="count-num">'+mensajes.length+'</span> mensaje(s) generado(s) · Copie cada uno y péguelo en WhatsApp Business</div>';
+
+      mensajes.forEach(function(m, i) {
+        var div = document.createElement('div');
+        div.className = 'bulk-item';
+        var msgId = 'msg-text-'+i;
+        div.innerHTML =
+          '<div class="bulk-header">' +
+            '<div>' +
+              '<div class="bulk-nombre">👤 '+esc(m.paciente)+'</div>' +
+              '<div class="bulk-sub">📞 '+esc(m.telefono)+' · '+esc(m.hora)+'</div>' +
+            '</div>' +
+            '<button class="btn btn-sm btn-wa" onclick="copiarAlPortapapeles(document.getElementById(\''+msgId+'\').textContent)">📋 Copiar</button>' +
+          '</div>' +
+          '<div class="msg-preview" id="'+msgId+'">'+esc(m.mensaje)+'</div>';
+        c.appendChild(div);
+      });
+    })
+    .withFailureHandler(function(e) {
+      document.getElementById('mensajes-container').innerHTML =
+        '<div class="loading" style="color:#d93025">❌ Error: '+e.message+'</div>';
+    })
+    .generarMensajesLote(filtros, tipo);
+}
+
+// ============================================================
+// PANEL BUSCAR
+// ============================================================
+var _buscarTimer = null;
+function buscarCitas(q) {
+  clearTimeout(_buscarTimer);
+  if (!q || q.length < 2) { document.getElementById('buscar-container').innerHTML = ''; return; }
+  _buscarTimer = setTimeout(function() {
+    document.getElementById('buscar-container').innerHTML =
+      '<div class="loading"><div class="spinner"></div></div>';
+    google.script.run
+      .withSuccessHandler(function(citas) {
+        var c = document.getElementById('buscar-container');
+        if (!citas || !citas.length) {
+          c.innerHTML = '<div class="loading">No se encontraron resultados</div>';
+          return;
+        }
+        c.innerHTML = '<div class="count-bar"><span class="count-num">'+citas.length+'</span> resultado(s)</div>';
+        citas.slice(0,25).forEach(function(cita) {
+          var div = document.createElement('div');
+          div.className = 'cita-card ' + (cita.estado||'').toLowerCase();
+          div.innerHTML =
+            '<div class="cita-top">' +
+              '<span style="font-size:12px;color:#5f6368">'+cita.fecha+' '+cita.hora+'</span>' +
+              '<span class="estado-badge badge-'+cita.estado+'">'+cita.estado+'</span>' +
+            '</div>' +
+            '<div class="cita-paciente">👤 '+esc(cita.paciente)+'</div>' +
+            '<div class="cita-info">📞 '+esc(cita.telefono)+'</div>' +
+            '<div class="cita-info">👨‍⚕️ '+esc(cita.doctor)+' · 💉 '+esc(cita.servicio)+'</div>';
+          c.appendChild(div);
+        });
+      })
+      .getCitas({buscar: q});
+  }, 400);
+}
+
+// ============================================================
+// UTILIDADES
+// ============================================================
+function esc(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+function copiarAlPortapapeles(texto) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(texto).then(function() {
+      mostrarToast('✅ Mensaje copiado. Pégalo en WhatsApp Business.');
+    }).catch(function() { fallbackCopiar(texto); });
+  } else { fallbackCopiar(texto); }
+}
+
+function fallbackCopiar(texto) {
+  var ta = document.createElement('textarea');
+  ta.value = texto;
+  ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); mostrarToast('✅ Mensaje copiado. Pégalo en WhatsApp Business.'); }
+  catch(e) { prompt('Copia este mensaje:', texto); }
+  document.body.removeChild(ta);
+}
+
+var _toast = null;
+function mostrarToast(msg) {
+  if (_toast) document.body.removeChild(_toast);
+  _toast = document.createElement('div');
+  _toast.textContent = msg;
+  _toast.style.cssText = 'position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#202124;color:#fff;padding:9px 16px;border-radius:20px;font-size:12px;font-weight:500;z-index:9999;white-space:nowrap;box-shadow:0 3px 10px rgba(0,0,0,.3)';
+  document.body.appendChild(_toast);
+  setTimeout(function(){ if(_toast){ document.body.removeChild(_toast); _toast=null; }}, 3000);
+}
+
+// Cerrar autocomplete al hacer click fuera
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#form-paciente') && !e.target.closest('#ac-paciente')) {
+    document.getElementById('ac-paciente').style.display = 'none';
+  }
+});
+
+window.onload = init;
+</script>
+</body>
+</html>
