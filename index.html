@@ -139,7 +139,8 @@
   .contact-form { display:flex; flex-direction:column; gap:1rem; }
   .form-group { display:flex; flex-direction:column; gap:0.4rem; }
   .form-group label { font-family:var(--mono); font-size:12px; color:var(--muted); }
-  .form-group input, .form-group textarea { background:var(--bg2); border:1px solid var(--border); border-radius:6px; padding:12px 14px; color:var(--text); font-family:var(--sans); font-size:14px; outline:none; transition:border-color 0.2s; }
+  
+   color:var(--text); font-family:var(--sans); font-size:14px; outline:none; transition:border-color 0.2s; }
   .form-group input:focus, .form-group textarea:focus { border-color:var(--green); }
   .form-group textarea { resize:vertical; min-height:110px; }
 
@@ -438,9 +439,9 @@
       </div>
       <div class="fade-up" style="transition-delay:0.15s">
         <form class="contact-form" action="https://formspree.io/f/xredgkdl" method="POST">
-          <div class="form-group"><label>// your_name</label><input type="text" placeholder="John Doe"></div>
-          <div class="form-group"><label>// your_email</label><input type="email" placeholder="john@company.com"></div>
-          <div class="form-group"><label>// message</label><textarea placeholder="Tell me about your project or opportunity..."></textarea></div>
+          <div class="form-group"><label>// your_name</label><input type="text" name="name" placeholder="John Doe"></div>
+          <div class="form-group"><label>// your_email</label><input type="email" name="email" placeholder="john@company.com"></div>
+          <div class="form-group"><label>// message</label><textarea name="message" placeholder="Tell me about your project or opportunity..."></textarea></div>
           <button type="submit" class="btn btn-primary" style="align-self:flex-start">→ Send message</button>
         </form>
       </div>
