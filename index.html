@@ -1,64 +1,462 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Mediveins AI</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Miguel Zapata · Problem Solver</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg:#0d1117; --bg2:#161b22; --bg3:#21262d; --border:#30363d;
+    --green:#3fb950; --green-dim:#238636; --blue:#58a6ff; --amber:#e3b341;
+    --text:#e6edf3; --muted:#8b949e;
+    --mono:'JetBrains Mono',monospace; --sans:'Syne',sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { background:var(--bg); color:var(--text); font-family:var(--sans); line-height:1.7; overflow-x:hidden; }
 
-  <link rel="stylesheet" href="style.css">
+  nav { position:fixed; top:0; left:0; right:0; z-index:100; background:rgba(13,17,23,0.88); backdrop-filter:blur(12px); border-bottom:1px solid var(--border); padding:0 2rem; display:flex; align-items:center; justify-content:space-between; height:60px; }
+  .nav-logo { font-family:var(--mono); font-size:14px; color:var(--green); }
+  .nav-logo span { color:var(--muted); }
+  .nav-links { display:flex; gap:2rem; list-style:none; }
+  .nav-links a { font-family:var(--mono); font-size:13px; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+  .nav-links a:hover { color:var(--green); }
+
+  #hero { min-height:100vh; display:flex; align-items:center; padding:80px 2rem 4rem; max-width:1100px; margin:0 auto; }
+  .hero-grid { display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:center; width:100%; }
+  .hero-tag { font-family:var(--mono); font-size:13px; color:var(--green); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:1rem; display:flex; align-items:center; gap:8px; }
+  .hero-tag::before { content:''; display:inline-block; width:24px; height:1px; background:var(--green); }
+  h1 { font-size:clamp(2.2rem,4.5vw,3.8rem); font-weight:800; line-height:1.1; letter-spacing:-0.02em; margin-bottom:1.5rem; }
+  h1 .accent { color:var(--green); }
+  .hero-desc { font-size:1.05rem; color:var(--muted); margin-bottom:2rem; max-width:480px; line-height:1.8; }
+  .hero-btns { display:flex; gap:1rem; flex-wrap:wrap; }
+  .btn { font-family:var(--mono); font-size:13px; padding:10px 20px; border-radius:6px; text-decoration:none; transition:all 0.2s; display:inline-flex; align-items:center; gap:8px; cursor:pointer; border:none; }
+  .btn-primary { background:var(--green-dim); color:#fff; border:1px solid var(--green); }
+  .btn-primary:hover { background:var(--green); color:var(--bg); }
+  .btn-secondary { background:transparent; color:var(--text); border:1px solid var(--border); }
+  .btn-secondary:hover { border-color:var(--green); color:var(--green); }
+
+  .terminal { background:var(--bg2); border:1px solid var(--border); border-radius:10px; overflow:hidden; font-family:var(--mono); font-size:13px; }
+  .terminal-bar { background:var(--bg3); padding:10px 16px; display:flex; align-items:center; gap:8px; border-bottom:1px solid var(--border); }
+  .dot { width:12px; height:12px; border-radius:50%; }
+  .dot-r{background:#ff5f57;} .dot-y{background:#febc2e;} .dot-g{background:#28c840;}
+  .terminal-title { font-size:12px; color:var(--muted); margin-left:auto; margin-right:auto; }
+  .terminal-body { padding:1.25rem 1.5rem; line-height:2.1; }
+  .t-prompt{color:var(--green);} .t-cmd{color:var(--text);} .t-out{color:var(--muted);}
+  .t-key{color:var(--blue);} .t-val{color:var(--amber);} .t-comment{color:#444d56;}
+  .cursor { display:inline-block; width:8px; height:14px; background:var(--green); vertical-align:middle; animation:blink 1s step-end infinite; }
+  @keyframes blink { 50%{opacity:0;} }
+
+  section { padding:6rem 2rem; }
+  .container { max-width:1100px; margin:0 auto; }
+  .section-label { font-family:var(--mono); font-size:12px; color:var(--green); letter-spacing:0.15em; text-transform:uppercase; margin-bottom:0.5rem; }
+  h2 { font-size:clamp(1.8rem,3vw,2.5rem); font-weight:800; letter-spacing:-0.02em; margin-bottom:1rem; }
+  .section-lead { font-size:1.05rem; color:var(--muted); max-width:640px; margin-bottom:3rem; line-height:1.8; }
+
+  #about { background:var(--bg2); }
+  .about-grid { display:grid; grid-template-columns:1fr 1.5fr; gap:4rem; align-items:start; }
+  .about-card { background:var(--bg3); border:1px solid var(--border); border-radius:10px; padding:1.5rem; }
+  .about-avatar { width:80px; height:80px; border-radius:50%; background:var(--green-dim); border:2px solid var(--green); display:flex; align-items:center; justify-content:center; font-size:2rem; font-weight:800; color:#fff; margin-bottom:1.25rem; }
+  .about-name { font-size:1.3rem; font-weight:700; margin-bottom:0.25rem; }
+  .about-role { font-family:var(--mono); font-size:13px; color:var(--green); margin-bottom:1rem; }
+  .about-meta { font-size:13px; color:var(--muted); line-height:2.2; }
+  .about-meta span { color:var(--text); }
+  .about-text { font-size:1rem; color:var(--muted); line-height:1.9; }
+  .about-text p { margin-bottom:1.1rem; }
+  .about-text strong { color:var(--text); font-weight:600; }
+  .skills-grid { display:flex; flex-wrap:wrap; gap:8px; margin-top:1.5rem; }
+  .skill-tag { font-family:var(--mono); font-size:12px; padding:4px 12px; background:var(--bg3); border:1px solid var(--border); border-radius:20px; color:var(--muted); }
+  .skill-tag.green { border-color:var(--green-dim); color:var(--green); }
+
+  #story { background:var(--bg); }
+  .story-layout { display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:start; }
+  .story-timeline { position:relative; padding-left:2rem; }
+  .story-timeline::before { content:''; position:absolute; left:7px; top:0; bottom:0; width:1px; background:var(--border); }
+  .story-entry { position:relative; margin-bottom:2.5rem; }
+  .story-dot { position:absolute; left:-2rem; top:6px; width:15px; height:15px; border-radius:50%; background:var(--bg3); border:2px solid var(--border); }
+  .story-dot.active { background:var(--green-dim); border-color:var(--green); }
+  .story-entry-label { font-family:var(--mono); font-size:11px; color:var(--green); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:0.4rem; }
+  .story-entry h3 { font-size:1.05rem; font-weight:700; margin-bottom:0.4rem; }
+  .story-entry p { font-size:0.95rem; color:var(--muted); line-height:1.8; }
+  .story-sticky { position:sticky; top:80px; display:flex; flex-direction:column; gap:1.5rem; }
+  .impact-card { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:2rem; }
+  .impact-item { display:flex; align-items:flex-start; gap:12px; margin-bottom:1.25rem; }
+  .impact-item:last-child { margin-bottom:0; }
+  .impact-check { color:var(--green); font-size:1.3rem; line-height:1; flex-shrink:0; }
+  .impact-title { font-size:14px; font-weight:600; margin-bottom:2px; }
+  .impact-sub { font-size:13px; color:var(--muted); }
+  .quote-card { background:var(--bg2); border:1px solid var(--green-dim); border-radius:12px; padding:1.75rem; }
+  .quote-text { font-size:1rem; line-height:1.8; color:var(--text); font-style:italic; margin-bottom:1rem; }
+  .quote-attr { font-family:var(--mono); font-size:12px; color:var(--green); }
+
+  #project { background:var(--bg2); }
+  .project-box { background:var(--bg3); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:3rem; }
+  .project-header { padding:2rem; border-bottom:1px solid var(--border); display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+  .project-badge { font-family:var(--mono); font-size:11px; background:rgba(63,185,80,0.1); border:1px solid var(--green-dim); color:var(--green); padding:3px 10px; border-radius:20px; margin-bottom:0.75rem; display:inline-block; }
+  .project-title { font-size:2rem; font-weight:800; margin-bottom:0.5rem; }
+  .project-sub { color:var(--muted); font-size:1rem; max-width:500px; }
+  .screenshot-area { background:var(--bg2); border-top:1px solid var(--border); padding:2rem; min-height:260px; display:flex; align-items:center; justify-content:center; }
+  .screenshot-placeholder { text-align:center; color:var(--muted); }
+  .screenshot-placeholder .icon { font-size:2.5rem; margin-bottom:1rem; opacity:0.25; }
+  .screenshot-placeholder p { font-family:var(--mono); font-size:12px; }
+
+  .flow { background:var(--bg3); border:1px solid var(--border); border-radius:10px; padding:2rem; margin-bottom:3rem; }
+  .flow-label { font-family:var(--mono); font-size:12px; color:var(--muted); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:1.5rem; }
+  .flow-steps { display:flex; align-items:center; overflow-x:auto; padding-bottom:0.5rem; }
+  .flow-step { flex-shrink:0; background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:0.75rem 1rem; text-align:center; min-width:110px; }
+  .flow-step .fs-icon { font-size:1.3rem; margin-bottom:0.25rem; }
+  .flow-step .fs-label { font-size:12px; font-weight:600; margin-bottom:0.2rem; }
+  .flow-step .fs-sub { font-family:var(--mono); font-size:10px; color:var(--muted); }
+  .flow-step.green-step { border-color:var(--green-dim); background:rgba(35,134,54,0.08); }
+  .flow-arrow { color:var(--muted); font-size:1rem; padding:0 0.4rem; flex-shrink:0; }
+
+  .how-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.25rem; margin-bottom:3rem; }
+  .how-card { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:1.5rem; transition:border-color 0.2s; }
+  .how-card:hover { border-color:var(--green-dim); }
+  .how-num { font-family:var(--mono); font-size:11px; color:var(--green); letter-spacing:0.1em; margin-bottom:0.75rem; }
+  .how-card h3 { font-size:1rem; font-weight:600; margin-bottom:0.5rem; }
+  .how-card p { font-size:0.9rem; color:var(--muted); line-height:1.7; }
+  .tag-row { display:flex; flex-wrap:wrap; gap:6px; margin-top:1rem; }
+  .tag { font-family:var(--mono); font-size:11px; padding:3px 8px; border-radius:4px; background:var(--bg3); border:1px solid var(--border); color:var(--muted); }
+
+  .stack-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem; }
+  .stack-item { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:1rem 1.25rem; display:flex; align-items:center; gap:12px; transition:border-color 0.2s; }
+  .stack-item:hover { border-color:var(--green-dim); }
+  .stack-icon { width:36px; height:36px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; }
+  .si-name { font-size:14px; font-weight:600; }
+  .si-role { font-family:var(--mono); font-size:11px; color:var(--muted); }
+
+  #contact { background:var(--bg); }
+  .contact-grid { display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:start; }
+  .contact-text p { color:var(--muted); font-size:1rem; line-height:1.9; margin-bottom:1.5rem; }
+  .contact-links { display:flex; flex-direction:column; gap:0.75rem; }
+  .contact-link { display:flex; align-items:center; gap:12px; background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:0.875rem 1.25rem; text-decoration:none; color:var(--text); transition:all 0.2s; }
+  .contact-link:hover { border-color:var(--green); color:var(--green); }
+  .cl-icon { font-size:1.1rem; }
+  .cl-label { font-size:14px; font-weight:600; }
+  .cl-sub { font-family:var(--mono); font-size:12px; color:var(--muted); margin-left:auto; }
+  .contact-form { display:flex; flex-direction:column; gap:1rem; }
+  .form-group { display:flex; flex-direction:column; gap:0.4rem; }
+  .form-group label { font-family:var(--mono); font-size:12px; color:var(--muted); }
+  .form-group input, .form-group textarea { background:var(--bg2); border:1px solid var(--border); border-radius:6px; padding:10px 14px; color:var(--text); font-family:var(--sans); font-size:14px; outline:none; transition:border-color 0.2s; }
+  .form-group input:focus, .form-group textarea:focus { border-color:var(--green); }
+  .form-group textarea { resize:vertical; min-height:110px; }
+
+  footer { border-top:1px solid var(--border); padding:2rem; text-align:center; font-family:var(--mono); font-size:12px; color:var(--muted); }
+  footer a { color:var(--green); text-decoration:none; }
+
+  .fade-up { opacity:0; transform:translateY(24px); transition:opacity 0.6s ease,transform 0.6s ease; }
+  .fade-up.visible { opacity:1; transform:none; }
+
+  @media(max-width:768px) {
+    .hero-grid,.about-grid,.story-layout,.contact-grid { grid-template-columns:1fr; }
+    .hero-terminal,.story-sticky { display:none; }
+    nav { padding:0 1rem; }
+    .nav-links { gap:1rem; }
+    section { padding:4rem 1.25rem; }
+  }
+</style>
 </head>
-
 <body>
 
-  <div class="container">
-    <h1>🏥 Mediveins AI</h1>
+<nav>
+  <div class="nav-logo">mzapata<span>-tech</span></div>
+  <ul class="nav-links">
+    <li><a href="#about">about</a></li>
+    <li><a href="#story">story</a></li>
+    <li><a href="#project">project</a></li>
+    <li><a href="#contact">contact</a></li>
+  </ul>
+</nav>
 
-    <p class="subtitle">
-      Intelligent medical automation system powered by AI + WhatsApp
-    </p>
-
-    <div class="card">
-      <h2>Main Features</h2>
-
-      <ul>
-        <li>✅ Automated appointment scheduling</li>
-        <li>✅ WhatsApp appointment confirmations</li>
-        <li>✅ AI-powered automated responses</li>
-        <li>✅ Medical appointment management</li>
-        <li>✅ Twilio and Claude AI integration</li>
-      </ul>
+<!-- HERO -->
+<div id="hero">
+  <div class="hero-grid">
+    <div class="fade-up">
+      <div class="hero-tag">Costa Rica · Open to remote work</div>
+      <h1>I use AI to build<br>things that <span class="accent">actually help.</span></h1>
+      <p class="hero-desc">CS fundamentals + AI tools. I understand how systems work and use AI to build real solutions — faster, cheaper, and closer to what people actually need.</p>
+      <div class="hero-btns">
+        <a href="#story" class="btn btn-primary">→ Read the story</a>
+        <a href="https://github.com/mzapata-tech" target="_blank" class="btn btn-secondary">GitHub</a>
+      </div>
     </div>
+    <div class="hero-terminal fade-up" style="transition-delay:0.15s">
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+          <div class="terminal-title">mediveins · agent "Maureen" running</div>
+        </div>
+        <div class="terminal-body">
+          <div><span class="t-prompt">$</span> <span class="t-cmd">status --clinic</span></div>
+          <div class="t-out">✓ Google Sheets connected</div>
+          <div class="t-out">✓ Twilio WhatsApp ready</div>
+          <div class="t-out">✓ Claude AI agent online</div>
+          <div>&nbsp;</div>
+          <div><span class="t-key">patient </span><span class="t-out">"Hola, quiero una cita con el Dr. García"</span></div>
+          <div><span class="t-key">agent  </span><span class="t-out">→ checking availability...</span></div>
+          <div><span class="t-val">3 slots found · sending options ✓</span></div>
+          <div>&nbsp;</div>
+          <div><span class="t-key">booked </span><span class="t-out">Jueves 22 · 9:00am · confirmed ✓</span></div>
+          <div><span class="t-key">sheets </span><span class="t-out">→ updated ✓</span></div>
+          <div><span class="t-key">calendar</span><span class="t-out">→ synced ✓</span></div>
+          <div>&nbsp;</div>
+          <div><span class="t-comment"># Secretary never touched a keyboard.</span></div>
+          <div><span class="t-prompt">$</span> <span class="cursor"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-    <div class="card">
-      <h2>Technologies Used</h2>
+<!-- ABOUT -->
+<section id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="fade-up">
+        <div class="about-card">
+          <div class="about-avatar">MZ</div>
+          <div class="about-name">Miguel Angel Zapata</div>
+          <div class="about-role">// problem solver · AI builder</div>
+          <div class="about-meta">
+            📍 <span>Zona de Acosta, Costa Rica</span><br>
+            🎓 <span>Computer Science fundamentals</span><br>
+            🤖 <span>AI-assisted development</span><br>
+            🌐 <span>Spanish · English</span>
+          </div>
+        </div>
+      </div>
+      <div class="fade-up" style="transition-delay:0.15s">
+        <div class="section-label">// about_me</div>
+        <h2>Not a traditional developer.<br><span style="color:var(--green)">Something better.</span></h2>
+        <div class="about-text">
+          <p>I studied computer science and understand the fundamentals — logic, systems, data structures, how things connect. But I don't write every line from scratch. I <strong>use AI as a tool</strong>, the same way a carpenter uses a power saw instead of cutting by hand.</p>
+          <p>The result? I can build systems that used to require a full development team — <strong>faster, cheaper, and closer to what the real user actually needs</strong> — because I'm the one who understands both the technical side and the human problem behind it.</p>
+          <p>MediVeins is proof. A real system, for a real clinic, solving a real problem — built by one person with CS knowledge, AI tools, and a clear purpose.</p>
+        </div>
+        <div class="skills-grid">
+          <span class="skill-tag green">AI-assisted development</span>
+          <span class="skill-tag green">Claude AI API</span>
+          <span class="skill-tag green">Twilio WhatsApp</span>
+          <span class="skill-tag">Google Apps Script</span>
+          <span class="skill-tag">Google Sheets API</span>
+          <span class="skill-tag">Google Calendar API</span>
+          <span class="skill-tag">JavaScript</span>
+          <span class="skill-tag">REST APIs</span>
+          <span class="skill-tag">Git · GitHub</span>
+          <span class="skill-tag">Systems thinking</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-      <div class="tech-grid">
-        <span>HTML</span>
-        <span>CSS</span>
-        <span>JavaScript</span>
-        <span>Google Apps Script</span>
-        <span>Twilio API</span>
-        <span>Claude AI</span>
-        <span>Google Sheets</span>
+<!-- STORY -->
+<section id="story">
+  <div class="container">
+    <div class="section-label fade-up">// origin_story</div>
+    <h2 class="fade-up">How MediVeins was born.</h2>
+    <p class="section-lead fade-up">Every good project starts with a real problem. This one started with my girlfriend getting a new job.</p>
+
+    <div class="story-layout">
+      <div class="story-timeline fade-up">
+        <div class="story-entry">
+          <div class="story-dot active"></div>
+          <div class="story-entry-label">the problem</div>
+          <h3>A clinic with no system</h3>
+          <p>My girlfriend was hired as a secretary at Clínica Integral Mediveins — a real medical clinic with 10 doctors. On her first week she realized there was no CRM, no digital calendar, no patient database. Everything was manual, scattered, and time-consuming.</p>
+        </div>
+        <div class="story-entry">
+          <div class="story-dot active"></div>
+          <div class="story-entry-label">the constraint</div>
+          <h3>"It has to be free."</h3>
+          <p>The clinic is small. Budget was zero. So expensive software was out of the question. She asked me if I could build something that connected Google Calendar, WhatsApp Business, and some kind of patient database — for free. I said yes.</p>
+        </div>
+        <div class="story-entry">
+          <div class="story-dot active"></div>
+          <div class="story-entry-label">the solution</div>
+          <h3>Google Sheets as the backbone</h3>
+          <p>I chose Google Sheets as the database — free, familiar to the secretary, and already inside Google's ecosystem. I built a custom sidebar UI directly inside Sheets using Apps Script, so she could manage 10 doctors' appointments without learning any new software.</p>
+        </div>
+        <div class="story-entry">
+          <div class="story-dot active"></div>
+          <div class="story-entry-label">the reality</div>
+          <h3>Bugs. Lots of them.</h3>
+          <p>The first version was rough. WhatsApp messages showed wrong times, Calendar sync broke, patient names were duplicating. But because I was using AI to help me build, I could find and fix errors faster than ever. Each bug became a lesson.</p>
+        </div>
+        <div class="story-entry">
+          <div class="story-dot active"></div>
+          <div class="story-entry-label">the evolution</div>
+          <h3>Then I added an AI agent</h3>
+          <p>Once the foundation was stable, I asked: what if AI didn't just help me build the system — what if it ran part of it? I built Maureen, a WhatsApp AI agent powered by Claude. She handles patient conversations, checks real-time availability, books appointments, and sends confirmations. The secretary just monitors.</p>
+        </div>
+      </div>
+
+      <div class="story-sticky fade-up" style="transition-delay:0.15s">
+        <div class="impact-card">
+          <div class="section-label" style="margin-bottom:1.25rem;">// real_impact</div>
+          <div class="impact-item">
+            <div class="impact-check">✓</div>
+            <div><div class="impact-title">10 doctors managed</div><div class="impact-sub">All calendars, services, and patients in one place</div></div>
+          </div>
+          <div class="impact-item">
+            <div class="impact-check">✓</div>
+            <div><div class="impact-title">Zero cost to the clinic</div><div class="impact-sub">Built entirely on free Google tools</div></div>
+          </div>
+          <div class="impact-item">
+            <div class="impact-check">✓</div>
+            <div><div class="impact-title">AI handles routine appointments</div><div class="impact-sub">Books, confirms, and cancels via WhatsApp</div></div>
+          </div>
+          <div class="impact-item">
+            <div class="impact-check">✓</div>
+            <div><div class="impact-title">Secretary only monitors</div><div class="impact-sub">From manual daily entry to oversight only</div></div>
+          </div>
+        </div>
+        <div class="quote-card">
+          <div class="quote-text">"I didn't build this to show I could code. I built it because someone I care about needed it, and no one else was going to build it for free."</div>
+          <div class="quote-attr">— Miguel, on why he built MediVeins</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECT -->
+<section id="project">
+  <div class="container">
+    <div class="section-label fade-up">// the_system</div>
+    <h2 class="fade-up">How it works.</h2>
+    <p class="section-lead fade-up">From a patient's WhatsApp message to a confirmed appointment in Google Calendar — without anyone touching a keyboard.</p>
+
+    <div class="project-box fade-up">
+      <div class="project-header">
+        <div>
+          <div class="project-badge">🟢 live · production</div>
+          <div class="project-title">MediVeins AI</div>
+          <div class="project-sub">AI-powered appointment system · Clínica Integral Mediveins, Costa Rica</div>
+        </div>
+        <div>
+          <a href="https://github.com/mzapata-tech/mediveins-ai" target="_blank" class="btn btn-secondary">View on GitHub →</a>
+        </div>
+      </div>
+      <div class="screenshot-area">
+        <!--
+          ADD YOUR SCREENSHOT:
+          1. Screenshot your clinic sidebar UI
+          2. Save as "screenshot.png" in your portfolio folder
+          3. Replace this block with:
+          <img src="screenshot.png" style="max-width:100%;border-radius:8px;border:1px solid #30363d;" alt="MediVeins Sidebar">
+        -->
+        <div class="screenshot-placeholder">
+          <div class="icon">🖥️</div>
+          <p>// sidebar screenshot goes here</p>
+          <p style="margin-top:0.5rem;font-size:11px;opacity:0.4">save as screenshot.png in your portfolio folder</p>
+        </div>
       </div>
     </div>
 
-    <div class="card">
-      <h2>About the Project</h2>
+    <div class="flow fade-up">
+      <div class="flow-label">// automated_appointment_flow</div>
+      <div class="flow-steps">
+        <div class="flow-step"><div class="fs-icon">📱</div><div class="fs-label">Patient</div><div class="fs-sub">WhatsApp</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="fs-icon">📡</div><div class="fs-label">Twilio</div><div class="fs-sub">webhook</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step green-step"><div class="fs-icon">🤖</div><div class="fs-label">Claude AI</div><div class="fs-sub">understands</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="fs-icon">📊</div><div class="fs-label">Sheets</div><div class="fs-sub">reads/writes</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="fs-icon">📅</div><div class="fs-label">Calendar</div><div class="fs-sub">synced</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step green-step"><div class="fs-icon">✅</div><div class="fs-label">Confirmed</div><div class="fs-sub">patient notified</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="fs-icon">👩‍💼</div><div class="fs-label">Secretary</div><div class="fs-sub">monitors only</div></div>
+      </div>
+    </div>
 
-      <p>
-        This project focuses on automating communication and medical
-        appointment management using artificial intelligence and WhatsApp.
-      </p>
+    <div class="how-grid">
+      <div class="how-card fade-up">
+        <div class="how-num">01 // intake</div>
+        <h3>Patient texts the clinic</h3>
+        <p>A patient sends a WhatsApp message in natural Spanish — asking to book, confirm, or cancel. Just like texting a real person. No app to download, no form to fill.</p>
+        <div class="tag-row"><span class="tag">Twilio</span><span class="tag">WhatsApp Business</span></div>
+      </div>
+      <div class="how-card fade-up" style="transition-delay:0.1s">
+        <div class="how-num">02 // intelligence</div>
+        <h3>Maureen reads and decides</h3>
+        <p>The AI agent understands the request, checks live data from Google Sheets, and decides what action to take — no scripts, no rigid menus, no buttons. Real conversation.</p>
+        <div class="tag-row"><span class="tag">Claude AI API</span><span class="tag">Conversation history</span></div>
+      </div>
+      <div class="how-card fade-up" style="transition-delay:0.2s">
+        <div class="how-num">03 // action</div>
+        <h3>Everything updates automatically</h3>
+        <p>New appointment written to Sheets, synced to Google Calendar, patient receives confirmation with doctor, time, price, and directions link. Zero human involvement.</p>
+        <div class="tag-row"><span class="tag">Google Sheets</span><span class="tag">Google Calendar</span></div>
+      </div>
+      <div class="how-card fade-up" style="transition-delay:0.3s">
+        <div class="how-num">04 // oversight</div>
+        <h3>Secretary monitors, not operates</h3>
+        <p>Staff sees everything in a clean sidebar inside Google Sheets. They can override any decision — but routine bookings, reminders, and confirmations are fully handled by AI.</p>
+        <div class="tag-row"><span class="tag">Sheets sidebar</span><span class="tag">Human override</span></div>
+      </div>
+    </div>
 
-      <p>
-        Patients can interact naturally with an AI assistant capable of
-        scheduling appointments, answering common questions, and sending
-        automatic confirmations.
-      </p>
+    <div class="section-label fade-up">// tech_stack</div>
+    <div class="stack-grid fade-up">
+      <div class="stack-item"><div class="stack-icon" style="background:rgba(63,185,80,0.1)">🤖</div><div><div class="si-name">Claude AI</div><div class="si-role">AI agent (Maureen)</div></div></div>
+      <div class="stack-item"><div class="stack-icon" style="background:rgba(88,166,255,0.1)">📱</div><div><div class="si-name">Twilio</div><div class="si-role">WhatsApp messaging</div></div></div>
+      <div class="stack-item"><div class="stack-icon" style="background:rgba(227,179,65,0.1)">📊</div><div><div class="si-name">Google Sheets</div><div class="si-role">Free database + UI</div></div></div>
+      <div class="stack-item"><div class="stack-icon" style="background:rgba(63,185,80,0.1)">⚙️</div><div><div class="si-name">Apps Script</div><div class="si-role">Backend logic</div></div></div>
+      <div class="stack-item"><div class="stack-icon" style="background:rgba(88,166,255,0.1)">📅</div><div><div class="si-name">Google Calendar</div><div class="si-role">Appointment sync</div></div></div>
+      <div class="stack-item"><div class="stack-icon" style="background:rgba(227,179,65,0.1)">👥</div><div><div class="si-name">Google Contacts</div><div class="si-role">Patient auto-sync</div></div></div>
     </div>
   </div>
+</section>
 
-  <script src="script.js"></script>
+<!-- CONTACT -->
+<section id="contact">
+  <div class="container">
+    <div class="contact-grid">
+      <div class="fade-up">
+        <div class="section-label">// contact</div>
+        <h2>Let's talk.</h2>
+        <p>Open to freelance automation projects, AI integrations, or full-time opportunities. Based in Costa Rica, working remote.</p>
+        <div class="contact-links">
+          <a href="https://github.com/mzapata-tech" target="_blank" class="contact-link">
+            <span class="cl-icon">🐙</span><span class="cl-label">GitHub</span><span class="cl-sub">mzapata-tech →</span>
+          </a>
+          <a href="https://www.linkedin.com/in/YOUR-LINKEDIN-HERE" target="_blank" class="contact-link">
+            <span class="cl-icon">💼</span><span class="cl-label">LinkedIn</span><span class="cl-sub">connect →</span>
+          </a>
+          <a href="mailto:clinicaintegralmediveins@gmail.com" class="contact-link">
+            <span class="cl-icon">✉️</span><span class="cl-label">Email</span><span class="cl-sub">send a message →</span>
+          </a>
+        </div>
+      </div>
+      <div class="fade-up" style="transition-delay:0.15s">
+        <div class="contact-form">
+          <div class="form-group"><label>// your_name</label><input type="text" placeholder="John Doe"></div>
+          <div class="form-group"><label>// your_email</label><input type="email" placeholder="john@company.com"></div>
+          <div class="form-group"><label>// message</label><textarea placeholder="Tell me about your project or opportunity..."></textarea></div>
+          <button class="btn btn-primary" style="align-self:flex-start">→ Send message</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  built with CS fundamentals + AI tools · <a href="https://github.com/mzapata-tech">mzapata-tech</a> · Costa Rica · 2025
+</footer>
+
+<script>
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); }});
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-up').forEach((el,i) => {
+    if(i < 4) el.classList.add('visible'); else obs.observe(el);
+  });
+</script>
 </body>
 </html>
